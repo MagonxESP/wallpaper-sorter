@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type Wallpaper struct {
@@ -35,12 +36,12 @@ func IsImage(file *os.File) bool {
 		".jpg",
 		".png",
 		".jpeg",
-		".jtif",
+		".jfif",
 		".gif",
 		".webp",
 	}
 
-	extension := filepath.Ext(file.Name())
+	extension := strings.ToLower(filepath.Ext(file.Name()))
 
 	for _, ext := range imgExtension {
 		if ext == extension {

@@ -103,7 +103,7 @@ func (f *Folder) WalkDir(_path string, d fs.DirEntry, err error) error {
 		err := f.ReadFileAndSort(_path)
 
 		if err != nil {
-			return err
+			log.Print(err)
 		}
 	}
 
@@ -128,10 +128,12 @@ func (f *Folder) Sort() error {
 	}
 
 	for _, file := range files {
-		err := f.ReadFileAndSort(path.Join(f.path, file.Name()))
+		if !file.IsDir() {
+			err := f.ReadFileAndSort(path.Join(f.path, file.Name()))
 
-		if err != nil {
-			log.Print(err)
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	}
 
