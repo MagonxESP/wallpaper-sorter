@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"time"
 )
 
 func GetFolder(directory string) Folder {
@@ -13,7 +15,7 @@ func GetFolder(directory string) Folder {
 		directory, err = os.Getwd()
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			os.Exit(1)
 		}
 	}
@@ -31,7 +33,7 @@ func SortWallpapers(folder Folder, recursive bool) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
@@ -39,6 +41,7 @@ func SortWallpapers(folder Folder, recursive bool) {
 func main() {
 	var dir string
 	var recursive bool
+	start := time.Now()
 
 	flag.BoolVar(&recursive, "r", false, "Sort wallpapers in subdirectories")
 	flag.StringVar(&dir, "dir", "", "The path of the wallpapers directory")
@@ -46,4 +49,6 @@ func main() {
 
 	folder := GetFolder(dir)
 	SortWallpapers(folder, recursive)
+
+	log.Println(fmt.Sprintf("Execution time: %s", time.Since(start)))
 }

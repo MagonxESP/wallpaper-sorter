@@ -7,11 +7,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 type Folder struct {
 	path       string
-	wallpapers []Wallpaper
 }
 
 func NewFolder(path string) Folder {
@@ -59,6 +59,22 @@ func OpenOrCreate(path string) (*os.File, error) {
 	return file, errOpen
 }
 
+func SetCopiedFileTimestamps(original *os.File, copy *os.File) error {
+	originalStat, err := os.Stat(original.Name())
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Chtimes(copy.Name(), time.Now(), originalStat.ModTime())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *Folder) SortWallpaper(wallpaper Wallpaper) error {
 	dir, err := f.CreateTypeDirectory(wallpaper)
 	var src *os.File
@@ -80,31 +96,30 @@ func (f *Folder) SortWallpaper(wallpaper Wallpaper) error {
 		return err
 	}
 
+	if err = SetCopiedFileTimestamps(src, dsc); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (f *Folder) ReadFileAndSort(_path string) error {
+func (f *Folder) ReadFileAndSort(_path string) {
 	wallpaper, err := NewWallpaper(_path)
 
 	if err != nil {
-		return err
+		log.Println(err)
+		return
 	}
 
 	if err := f.SortWallpaper(wallpaper); err != nil {
-		return err
+		log.Println(err)
 	}
-
-	return nil
 }
 
 func (f *Folder) WalkDir(_path string, d fs.DirEntry, err error) error {
 	// ensure if the wallpaper is located on the root directory
 	if !d.IsDir() {
-		err := f.ReadFileAndSort(_path)
-
-		if err != nil {
-			log.Print(err)
-		}
+		f.ReadFileAndSort(_path)
 	}
 
 	return nil
@@ -129,11 +144,7 @@ func (f *Folder) Sort() error {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			err := f.ReadFileAndSort(path.Join(f.path, file.Name()))
-
-			if err != nil {
-				log.Print(err)
-			}
+			f.ReadFileAndSort(path.Join(f.path, file.Name()))
 		}
 	}
 

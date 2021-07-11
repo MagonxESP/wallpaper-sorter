@@ -21,6 +21,7 @@ type Wallpaper struct {
 const (
 	TypeMobile  = "mobile"
 	TypeDesktop = "desktop"
+	TypeStandard = "standard"
 )
 
 func NewWallpaper(path string) (Wallpaper, error) {
@@ -81,6 +82,7 @@ func (w *Wallpaper) Type() (string, error) {
 	types := map[string]bool{
 		TypeMobile:  w.image.Width < w.image.Height,
 		TypeDesktop: w.image.Width > w.image.Height,
+		TypeStandard: w.image.Width == w.image.Height,
 	}
 
 	for _type, isType := range types {
@@ -89,7 +91,7 @@ func (w *Wallpaper) Type() (string, error) {
 		}
 	}
 
-	return "", errors.New("unknown wallpaper type")
+	return "", errors.New(fmt.Sprintf("unknown wallpaper type for %s", w.path))
 }
 
 func (w *Wallpaper) FileName() string {
