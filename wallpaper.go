@@ -8,7 +8,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -19,8 +18,8 @@ type Wallpaper struct {
 }
 
 const (
-	TypeMobile  = "mobile"
-	TypeDesktop = "desktop"
+	TypeMobile   = "mobile"
+	TypeDesktop  = "desktop"
 	TypeStandard = "standard"
 )
 
@@ -80,8 +79,8 @@ func (w *Wallpaper) Read() error {
 func (w *Wallpaper) Type() (string, error) {
 
 	types := map[string]bool{
-		TypeMobile:  w.image.Width < w.image.Height,
-		TypeDesktop: w.image.Width > w.image.Height,
+		TypeMobile:   w.image.Width < w.image.Height,
+		TypeDesktop:  w.image.Width > w.image.Height,
 		TypeStandard: w.image.Width == w.image.Height,
 	}
 
@@ -95,5 +94,17 @@ func (w *Wallpaper) Type() (string, error) {
 }
 
 func (w *Wallpaper) FileName() string {
-	return path.Base(w.path)
+	return filepath.Base(w.path)
+}
+
+func IsSortedDirectory(dirPath string) bool {
+	stat, err := os.Stat(dirPath)
+
+	if err == nil && !stat.IsDir() {
+		return false
+	}
+
+	return filepath.Base(dirPath) == TypeMobile ||
+		filepath.Base(dirPath) == TypeDesktop ||
+		filepath.Base(dirPath) == TypeStandard
 }

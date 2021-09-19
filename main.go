@@ -23,7 +23,7 @@ func GetFolder(directory string) Folder {
 	return NewFolder(directory)
 }
 
-func SortWallpapers(folder Folder, recursive bool) {
+func SortWallpapers(folder *Folder, recursive bool) {
 	var err error
 
 	if recursive {
@@ -48,7 +48,7 @@ func main() {
 	flag.Parse()
 
 	folder := GetFolder(dir)
-	SortWallpapers(folder, recursive)
+	SortWallpapers(&folder, recursive)
 
 	log.Println(fmt.Sprintf("Execution time: %s", time.Since(start)))
 }

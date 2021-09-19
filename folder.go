@@ -1,17 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
 type Folder struct {
-	path       string
+	path           string
+	filesWaitGroup sync.WaitGroup
 }
 
 func NewFolder(path string) Folder {
@@ -104,21 +107,35 @@ func (f *Folder) SortWallpaper(wallpaper Wallpaper) error {
 }
 
 func (f *Folder) ReadFileAndSort(_path string) {
-	wallpaper, err := NewWallpaper(_path)
+	f.filesWaitGroup.Add(1)
 
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	go func() {
+		defer f.filesWaitGroup.Done()
+		wallpaper, err := NewWallpaper(_path)
 
-	if err := f.SortWallpaper(wallpaper); err != nil {
-		log.Println(err)
-	}
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ignore := NewIgnorePaths(f.path)
+
+		if ignore.IsIgnored(_path) {
+			log.Println(fmt.Sprintf("Ignoring the path: %s", _path))
+			return
+		}
+
+		log.Println(fmt.Sprintf("Sorting: %s", _path))
+
+		if err := f.SortWallpaper(wallpaper); err != nil {
+			log.Println(err)
+		}
+	}()
 }
 
 func (f *Folder) WalkDir(_path string, d fs.DirEntry, err error) error {
 	// ensure if the wallpaper is located on the root directory
-	if !d.IsDir() {
+	if !d.IsDir() && !IsSortedDirectory(filepath.Dir(_path)) {
 		f.ReadFileAndSort(_path)
 	}
 
@@ -130,6 +147,8 @@ func (f *Folder) SortRecursive() error {
 	if err := filepath.WalkDir(f.path, f.WalkDir); err != nil {
 		return err
 	}
+
+	f.filesWaitGroup.Wait()
 
 	return nil
 }
@@ -147,6 +166,8 @@ func (f *Folder) Sort() error {
 			f.ReadFileAndSort(path.Join(f.path, file.Name()))
 		}
 	}
+
+	f.filesWaitGroup.Wait()
 
 	return nil
 }
