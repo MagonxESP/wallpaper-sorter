@@ -83,6 +83,9 @@ func (f *Folder) SortWallpaper(wallpaper Wallpaper) error {
 	var src *os.File
 	var dsc *os.File
 
+	defer src.Close()
+	defer dsc.Close()
+
 	if err != nil {
 		return err
 	}

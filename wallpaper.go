@@ -54,6 +54,7 @@ func IsImage(file *os.File) bool {
 
 func (w *Wallpaper) Read() error {
 	file, err := os.Open(w.path)
+	defer file.Close()
 
 	if err != nil {
 		return err
@@ -62,8 +63,6 @@ func (w *Wallpaper) Read() error {
 	if !IsImage(file) {
 		return errors.New(fmt.Sprintf("the file \"%s\" is not an image", file.Name()))
 	}
-
-	defer file.Close()
 
 	img, _, err := image.DecodeConfig(file)
 
