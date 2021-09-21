@@ -5,27 +5,26 @@ import (
 	"log"
 )
 
-const MaxQueueLength = 10
-
 const (
-	QueueRunning = "running"
-	QueueStop = "stop"
-	QueueFinished = "finished"
+	MaxQueueLength = 10
+	QueueRunning   = "running"
+	QueueStop      = "stop"
+	QueueFinished  = "finished"
 )
 
 type Queue struct {
-	queue  [MaxQueueLength]string
-	sorter Sorter
+	queue   [MaxQueueLength]string
+	sorter  Sorter
 	pending int
-	status string
+	status  string
 }
 
 func NewQueue(sorter Sorter) Queue {
 	return Queue{
-		queue: [MaxQueueLength]string{""},
-		sorter: sorter,
+		queue:   [MaxQueueLength]string{""},
+		sorter:  sorter,
 		pending: 0,
-		status: QueueStop,
+		status:  QueueStop,
 	}
 }
 
