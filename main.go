@@ -3,12 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/MagonxESP/wallpaper-sorter/sort"
+	"github.com/MagonxESP/wallpaper-sorter/wallpaper"
 	"log"
 	"os"
 	"time"
 )
 
-func GetFolder(directory string) Folder {
+func GetFolder(directory string) sort.Folder {
 	var err error
 
 	if directory == "" {
@@ -20,10 +22,11 @@ func GetFolder(directory string) Folder {
 		}
 	}
 
-	return NewFolder(directory)
+	sorter := wallpaper.NewSizeSorter(directory)
+	return sort.NewFolder(directory, sort.NewQueue(&sorter))
 }
 
-func SortWallpapers(folder *Folder, recursive bool) {
+func SortWallpapers(folder *sort.Folder, recursive bool) {
 	var err error
 
 	if recursive {
